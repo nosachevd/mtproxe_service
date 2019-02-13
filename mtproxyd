@@ -1,0 +1,97 @@
+#!/bin/bash
+###
+# mtproto-proxy - Start/Stop the MTProto Proxy server.
+#
+# chkconfig: 2345 90 60
+# description: Service for MTProto Proxy server
+###
+
+SERVICE="MTProto Proxy server"
+RETVAL=0
+
+SECRET_KEY="%%SECRET_KEY%%"
+
+PROCESS=`ps -ef | grep -i mtproto-proxy | egrep "SCREEN" | awk '{ print $2 }'`
+SERVERBIN=`find / -name mtproto-proxy 2> /dev/null`
+SERVERDIR=`find / -name mtproto-proxy 2> /dev/null | awk '{gsub("/mtproto-proxy", "");print}'`
+
+USER=`find / -name mtproto-proxy | xargs ls -l | awk '{ print $3 }'`
+
+if [ -z "$SERVERBIN" ]
+then
+    echo "mtproto-proxy not found"
+    exit 1
+fi
+
+start()
+{
+	if [ -z "$PROCESS" ]
+	then
+		echo "$SERVICE is now starting"
+		#service iptables stop > /dev/null
+		sudo -u $USER screen -S mtproto-proxy -d -m -c /dev/null -- sh -c "$SERVERBIN -u nobody -p 8888 -H 443 -S $SECRET_KEY --aes-pwd $SERVERDIR/proxy-secret $SERVERDIR/proxy-multi.conf -M 1"
+		sleep 5s
+		PROCESS=`ps -ef | grep -i mtproto-proxy | egrep "SCREEN" | awk '{ print $2 }'`
+		ps -p $PROCESS > /dev/null && echo "$SERVICE has been started" || echo "$SERVICE failed to run, check server files and configuration"
+	else
+		echo "$SERVICE appears to already be running"
+	fi
+}
+
+stop()
+{
+	if [ "$PROCESS" ]
+	then
+		echo "$SERVICE is now stopping"
+		sleep 5
+		sudo -u $USER bash << EOF
+		screen -d mtproto-proxy > /dev/null
+		screen -S mtproto-proxy -X stuff $'stop\n'
+		kill -15 $PROCESS > /dev/null 2>&1 && echo "$SERVICE stopped successfully" || echo "$SERVICE failed to stop, kill it manually"
+EOF
+	else
+		echo "$SERVICE is not running"
+	fi
+}
+
+status()
+{
+	if [ "$PROCESS" ]
+	then
+		echo -e "$SERVICE is \e[32mrunning\e[39m"
+
+		else
+		echo -e "$SERVICE is \e[31mstopped\e[39m"
+	fi
+}
+
+restart()
+{
+	if [ "$PROCESS" ]
+	then
+		stop
+	else
+		echo "$SERVICE was already stopped"
+	fi
+		#PROCESS=`ps -ef | grep -i mtproto-proxy | egrep -v "grep|SCREEN" | awk '{ print $2 }'`
+		start
+}
+
+case $1 in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart)
+		restart
+		;;
+	status)
+		status
+		;;
+	*)
+echo $"Usage: $0 {start|stop|restart|status}"
+	exit 1
+esac
+exit $RETVAL
