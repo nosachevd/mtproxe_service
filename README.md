@@ -11,17 +11,17 @@ MTProto Proxy custome service fro RHEL/CentOS 6
 #### Usage
 In script find and replace **%%SECRET_KEY%%** to your generated secret key, example
 
-SECRET_KEY="%%SECRET_KEY%%"
-to
-SECRET_KEY="auhf98YEYDFHYA*YFyhgefhsaef"
+    SECRET_KEY="%%SECRET_KEY%%"
+    to
+    SECRET_KEY="auhf98YEYDFHYA*YFyhgefhsaef"
 
 Service support standard command
 
-service mtproxyd start
-service mtproxyd stop
-service mtproxyd status
-service mtproxyd restart
+    service mtproxyd start
+    service mtproxyd stop
+    service mtproxyd status
+    service mtproxyd restart
 
 Service also can be started with OS:
 
-chkconfig mtproxyd on
+    chkconfig mtproxyd on
