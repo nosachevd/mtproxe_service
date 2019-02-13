@@ -7,7 +7,7 @@ MTProto Proxy custome service fro RHEL/CentOS 6
 - Generated secret key
 - Open 443 port in firewall  
 
-####Usage
+#### Usage
 In script find and replace **%%SECRET_KEY%%** to your generated secret key, example
     SECRET_KEY="%%SECRET_KEY%%"
     to
